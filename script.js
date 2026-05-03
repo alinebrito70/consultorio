@@ -4,7 +4,19 @@ let fila       = new Array(MAX).fill(null);
 let inicio     = 0;
 let fim        = 0;
 let quantidade = 0;
-let atendidos  = 0;
+let atendidos  = [];
+
+function salvarHistorico() {
+  localStorage.setItem("historicoAtendidos", JSON.stringify(atendidos));
+}
+
+function carregarHistorico() {
+  const dados = localStorage.getItem("historicoAtendidos");
+
+  if (dados) {
+    atendidos = JSON.parse(dados);
+  }
+}
 
 function filaCheia() { return quantidade === MAX; }
 function filaVazia()  { return quantidade === 0; }
@@ -54,10 +66,9 @@ function chamarPaciente() {
   fila[inicio] = null;
   inicio = (inicio + 1) % MAX;
   quantidade--;
-  atendidos++;
-
+  atendidos.push(paciente);
+  salvarHistorico();
   mostrarToast("Chamando para consulta: " + paciente.nome, "warn");
-  document.getElementById("stat-atend").textContent = atendidos;
   renderTudo();
 }
 
@@ -79,6 +90,66 @@ function buscarCPF() {
     }
   }
   mostrarToast("CPF não encontrado na fila.", "err");
+}
+
+function removerDesistente() {
+  const cpfRemover = document.getElementById("inp-cpf-remover").value.trim();
+
+  if (!cpfRemover) {
+    mostrarToast("Digite o CPF do paciente que desistiu.", "warn");
+    return;
+  }
+
+  if (filaVazia()) {
+    mostrarToast("Fila vazia! Não há paciente para remover.", "err");
+    return;
+  }
+
+  const ordenados = getOrdenados();
+  const novaFila = new Array(MAX).fill(null);
+  let novaQtd = 0;
+  let encontrado = false;
+  let removido = null;
+
+  for (let i = 0; i < ordenados.length; i++) {
+    const paciente = ordenados[i].paciente;
+
+    if (paciente.cpf === cpfRemover) {
+      encontrado = true;
+      removido = paciente;
+    } else {
+      novaFila[novaQtd] = paciente;
+      novaQtd++;
+    }
+  }
+
+  if (!encontrado) {
+    mostrarToast("CPF não encontrado na fila.", "err");
+    return;
+  }
+
+  fila = novaFila;
+  inicio = 0;
+  fim = novaQtd % MAX;
+  quantidade = novaQtd;
+
+  document.getElementById("inp-cpf-remover").value = "";
+
+  mostrarToast(removido.nome + " foi removido(a) da fila por desistência.", "warn");
+  renderTudo();
+}
+
+function reiniciarSistema() {
+  fila = new Array(MAX).fill(null);
+  inicio = 0;
+  fim = 0;
+  quantidade = 0;
+  atendidos = [];
+
+  localStorage.removeItem("historicoAtendidos");
+
+  mostrarToast("Sistema reiniciado com sucesso!", "info");
+  renderTudo();
 }
 
 function renderFilaCircular() {
@@ -205,10 +276,49 @@ function renderLista() {
   });
 }
 
+function renderAtendidos() {
+  const area = document.getElementById("lista-atendidos");
+  area.innerHTML = "";
+
+  if (atendidos.length === 0) {
+    area.innerHTML = '<div class="lista-vazia">Nenhum paciente atendido ainda.</div>';
+    return;
+  }
+
+  atendidos.forEach(function(paciente, i) {
+    const row = document.createElement("div");
+    row.className = "paciente-row";
+
+    const pos = document.createElement("div");
+    pos.className = "p-pos";
+    pos.textContent = i + 1;
+
+    const info = document.createElement("div");
+    info.className = "p-info";
+    info.innerHTML =
+      '<div class="p-nome">' + paciente.nome + '</div>' +
+      '<div class="p-detalhes">' +
+        '<span class="p-chip">' + ocultarCPF(paciente.cpf) + '</span>' +
+        '<span class="p-chip">' + paciente.idade + ' anos</span>' +
+      '</div>';
+
+    const lado = document.createElement("div");
+    lado.className = "p-lado";
+    lado.innerHTML = '<span class="p-badge-numero">atendido</span>';
+
+    row.appendChild(pos);
+    row.appendChild(info);
+    row.appendChild(lado);
+    area.appendChild(row);
+  });
+}
+
 function renderTudo() {
   document.getElementById("stat-fila").textContent = quantidade;
+  document.getElementById("stat-atend").textContent = atendidos.length;
   renderFilaCircular();
   renderLista();
+  renderAtendidos();
 }
 
 let toastTimer = null;
@@ -217,7 +327,7 @@ function mostrarToast(msg, tipo) {
   el.textContent = msg;
   el.className = "toast " + tipo;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function() { el.className = "toast hidden"; }, 3500);
+  toastTimer = setTimeout(function() { el.className = "toast hidden"; }, 5000);
 }
 
 function maskCPF(el) {
@@ -234,16 +344,20 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("btn-chamar").addEventListener("click", chamarPaciente);
   document.getElementById("btn-proximo").addEventListener("click", mostrarProximo);
   document.getElementById("btn-buscar").addEventListener("click", buscarCPF);
-
+  document.getElementById("btn-remover").addEventListener("click", removerDesistente);
+  document.getElementById("btn-reset").addEventListener("click", reiniciarSistema);
   document.getElementById("inp-cpf").addEventListener("input", function(e) { maskCPF(e.target); });
   document.getElementById("inp-cpf-busca").addEventListener("input", function(e) { maskCPF(e.target); });
-
+  document.getElementById("inp-cpf-remover").addEventListener("input", function(e) { maskCPF(e.target); });
   document.getElementById("inp-idade").addEventListener("keydown", function(e) {
     if (e.key === "Enter") adicionarPaciente();
   });
   document.getElementById("inp-cpf-busca").addEventListener("keydown", function(e) {
     if (e.key === "Enter") buscarCPF();
   });
-
+  document.getElementById("inp-cpf-remover").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") removerDesistente();
+  });
+  carregarHistorico();
   renderTudo();
 });
