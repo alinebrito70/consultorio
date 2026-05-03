@@ -3,13 +3,13 @@
 
 #define MAX 10
 
-typedef struct {
+typedef struct Paciente {
     char cpf[12];
     char nome[40];
     char idade[4];
 } Paciente;
 
-typedef struct {
+typedef struct FilaCircular {
     int inicio;
     int fim;
     int quantidade;
