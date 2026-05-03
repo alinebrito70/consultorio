@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fila Circular — Consultório</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-cross">✚</span>
+      <span>ConsultaFila</span>
+    </div>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-num" id="stat-fila">0</span><span class="stat-label">na fila</span></div>
+      <div class="stat-div"></div>
+      <div class="stat"><span class="stat-num" id="stat-atend">0</span><span class="stat-label">atendidos</span></div>
+      <div class="stat-div"></div>
+      <div class="stat"><span class="stat-num">10</span><span class="stat-label">capacidade</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <aside class="sidebar">
+
+    <section class="card">
+      <h2 class="card-title">Novo paciente</h2>
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" id="inp-nome" placeholder="Ana Clara Souza" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>CPF</label>
+        <input type="text" id="inp-cpf" placeholder="000.000.000-00" maxlength="14" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>Idade</label>
+        <input type="number" id="inp-idade" placeholder="34" min="0" max="130"/>
+      </div>
+      <button class="btn btn-primary" id="btn-adicionar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Adicionar à fila
+      </button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Atendimento</h2>
+      <button class="btn btn-chamar" id="btn-chamar">
+        Chamar para o atendimento
+      </button>
+      <button class="btn btn-ghost" id="btn-proximo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Ver próximo
+      </button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Buscar por CPF</h2>
+      <div class="field">
+        <input type="text" id="inp-cpf-busca" placeholder="000.000.000-00" maxlength="14"/>
+      </div>
+      <button class="btn btn-ghost" id="btn-buscar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Buscar
+      </button>
+    </section>
+
+  </aside>
+
+  <section class="main-area">
+
+    <div id="toast" class="toast hidden"></div>
+
+    <div class="fila-header">
+      <h2 class="section-title">Fila circular — 10 posições</h2>
+      <div class="legenda">
+        <span class="leg leg-inicio">início</span>
+        <span class="leg leg-fim">fim</span>
+        <span class="leg leg-ocupado">ocupado</span>
+        <span class="leg leg-vazio">vazio</span>
+      </div>
+    </div>
+
+    <div class="fila-circular" id="fila-visual"></div>
+
+    <div class="lista-header">
+      <h2 class="section-title">Pacientes em ordem de chegada</h2>
+    </div>
+    <div class="lista-pacientes" id="lista-pacientes">
+      <div class="lista-vazia">Nenhum paciente na fila ainda.</div>
+    </div>
+
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
