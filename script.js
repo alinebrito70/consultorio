@@ -1,10 +1,12 @@
+// Lógica do sistema de fila para consultório médico//
+
 const MAX = 10;
 
 let fila       = new Array(MAX).fill(null);
-let inicio     = 0;
-let fim        = 0;
-let quantidade = 0;
-let atendidos  = [];
+let inicio     = 0;    //PROXIMO A SER ATENDIDO
+let fim        = 0;    //ONDE O PACIENTE SERÁ INSERIDO
+let quantidade = 0;    //CONTROLA PACIENTES 
+let atendidos  = [];   //ARMAZENA HISTÓRICO DE ATENDIDOS
 
 function salvarHistorico() {
   localStorage.setItem("historicoAtendidos", JSON.stringify(atendidos));
@@ -17,6 +19,8 @@ function carregarHistorico() {
     atendidos = JSON.parse(dados);
   }
 }
+
+//VERIFICA SE A FILA ESTÁ CHEIA OU VAZIA
 
 function filaCheia() { return quantidade === MAX; }
 function filaVazia()  { return quantidade === 0; }
@@ -46,6 +50,8 @@ function adicionarPaciente() {
     if (fila[(inicio + i) % MAX].cpf === cpf) { mostrarToast("Esse CPF já está na fila!", "warn"); return; }
   }
 
+  //ADICIONA O PACIENTE NA FILA CIRCULAR
+
   fila[fim] = { nome, cpf, idade };
   fim = (fim + 1) % MAX;
   quantidade++;
@@ -61,6 +67,8 @@ function adicionarPaciente() {
 
 function chamarPaciente() {
   if (filaVazia()) { mostrarToast("Fila vazia! Nenhum paciente para chamar.", "err"); return; }
+
+  //AQUI O PACIENTE QUE É CHAMADO É SEMPRE O QUE ESTÁ NO INICIO DA FILA, E DEPOIS ELE É REMOVIDO E ADICIONADO AO HISTÓRICO DE ATENDIDOS//
 
   const paciente = fila[inicio];
   fila[inicio] = null;
@@ -159,6 +167,8 @@ function renderFilaCircular() {
   for (let i = 0; i < MAX; i++) {
     const slot = document.createElement("div");
     slot.className = "slot";
+
+    //IDENTIFICA VISUALMENTE O INÍCIO E O FIM DA FILA CIRCULAR//
 
     const isInicio = !filaVazia() && i === inicio;
     const isFim    = i === fim;
